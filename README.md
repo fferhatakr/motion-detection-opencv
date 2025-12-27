@@ -13,7 +13,7 @@ Bu proje, Python kullanarak görüntülerdeki hareketleri tespit eden bir uygula
 ##  Kurulum
 1. Bu depoyu klonlayın:
    ```bash
-   git clone [https://github.com/kullanici-adin/repo-adin.git](https://github.com/kullanici-adin/repo-adin.git)
+   git clone https://github.com/fferhatakr/motion-detection-opencv.git
 2.Gerekli kütüphaneleri kurun:
   pip install -r requirements.txt
   
