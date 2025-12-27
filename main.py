@@ -1,8 +1,8 @@
 """
-Bu proje webcam üzerinden hareket algılama yapar.
-- Normal durumda 10 saniyede bir log kaydı alır
-- Anormal harekette anında kayıt yapar
-- Kayıtlar CSV dosyasına yazılır
+Bu proje webcam üzerinden hareket algilama yapar.
+- Normal durumda 10 saniyede bir log kaydi alir.
+- Anormal harekette aninda kayit yapar
+- Kayitlar CSV dosyasina yazilir
 """
 
 import cv2
@@ -28,6 +28,13 @@ normal_log_interval = 10
 cap = cv2.VideoCapture(0) #webcam kamerasını açma
 ret , square = cap.read()
 prev_gray = cv2.cvtColor(square,cv2.COLOR_BGR2GRAY) #webcemdeki goruntuyu griye cevirme
+
+motion_active = False         
+motion_start_time = None  
+motion_end_time = None     
+event_id = 0                  
+event_scores = []# Event 
+
 
 try:
     while True:
@@ -62,23 +69,40 @@ try:
                 x, y, w, h = cv2.boundingRect(c)
                 cv2.rectangle(frame, (x, y), (x+w, y+h), (0,0,255), 2)
 
-           
+        if motion_detected and not motion_active:
+            motion_active = True
+            motion_start_time = datetime.now()
+            event_id += 1
+            event_scores = []
 
-
-        if motion_detected:
             logs.append({
-                "time": timestamp,
-                "status": "ANORMAL HAREKET",
-                "score": motion_score
-            })
+                "event_id": event_id,
+                "event": "Start",
+                "time": motion_start_time.strftime("%Y-%m-%d %H:%M:%S")
 
-        elif current_time - last_normal_log_time >= normal_log_interval:
-            logs.append({
-                "time": timestamp,
-                "status": "Sistem aktif (normal)",
-                "score": motion_score
             })
-            last_normal_log_time = current_time
+        elif motion_detected and motion_active:
+            event_scores.append(motion_score)
+
+
+        elif not motion_detected and motion_active:
+            motion_active = False
+            motion_end_time = datetime.now()
+
+            duration =  ( motion_end_time - motion_start_time).total_seconds()
+            score_avg = np.mean(event_scores) if event_scores else 0
+
+            logs.append({
+                "event_id":  event_id,
+                "event": "END",
+                "start_time": motion_start_time.strftime("%Y-%m-%d %H:%M:%S"),
+                "end_time": motion_end_time.strftime("%Y-%m-%d %H:%M:%S"),
+                "duration_sec":round(duration, 2),
+                "avg_motion_score": round(score_avg, 2)
+            })
+            
+
+
 
         if cv2.waitKey(1) & 0xFF == ord('q'): #Cıkıs icin q 
             break
@@ -92,16 +116,3 @@ finally:
     
     cap.release() #Temizleme
     cv2.destroyAllWindows()#Temizleme
-
-
-
-    
-
-
-
-
-
-
-
-
-

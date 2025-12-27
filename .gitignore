@@ -1,3 +1,5 @@
 venv/
 logs/
 *.whl
+*.csv
+__pycache__/
